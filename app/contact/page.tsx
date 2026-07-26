@@ -56,14 +56,14 @@ export default async function ContactPage({
             <div>
               <span>PHONE</span>
               <strong>
-                +254 700 000 000
+                +254 728 043 113
               </strong>
             </div>
 
             <div>
               <span>EMAIL</span>
               <strong>
-                hello@workify.co.ke
+                workify.co.ke@gmail.com
               </strong>
             </div>
 
