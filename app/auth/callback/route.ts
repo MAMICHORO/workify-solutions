@@ -8,47 +8,83 @@ export async function GET(request: Request) {
 
   if (!code) {
     return NextResponse.redirect(
-      new URL("/login?error=missing_code", requestUrl.origin)
+      new URL(
+        "/login?error=missing_code",
+        requestUrl.origin
+      )
     );
   }
 
   const supabase = await createClient();
 
-  const { error } =
+  const { error: exchangeError } =
     await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
-    console.error("OAuth callback error:", error);
+  if (exchangeError) {
+    console.error(
+      "OAuth session exchange failed:",
+      exchangeError
+    );
 
     return NextResponse.redirect(
-      new URL("/login?error=oauth_failed", requestUrl.origin)
+      new URL(
+        "/login?error=oauth_failed",
+        requestUrl.origin
+      )
     );
   }
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (userError || !user) {
+    console.error(
+      "Authenticated user lookup failed:",
+      userError
+    );
+
     return NextResponse.redirect(
-      new URL("/login?error=no_user", requestUrl.origin)
+      new URL(
+        "/login?error=no_user",
+        requestUrl.origin
+      )
     );
   }
 
-  const { data: profile } = await supabase
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
     .from("profiles")
     .select("role, active")
     .eq("id", user.id)
     .maybeSingle();
 
+  if (profileError) {
+    console.error(
+      "Admin profile lookup failed:",
+      profileError
+    );
+
+    return NextResponse.redirect(
+      new URL(
+        "/login?error=profile_lookup_failed",
+        requestUrl.origin
+      )
+    );
+  }
+
   const isAdministrator =
     profile?.role === "super_admin" &&
     profile?.active === true;
 
+  const destination = isAdministrator
+    ? "/admin"
+    : "/profile";
+
   return NextResponse.redirect(
-    new URL(
-      isAdministrator ? "/admin" : "/profile",
-      requestUrl.origin
-    )
+    new URL(destination, requestUrl.origin)
   );
 }
