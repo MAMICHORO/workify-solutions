@@ -19,6 +19,7 @@ import {
   getGalleryItems,
   saveGalleryItem,
 } from "@/lib/galleryDb";
+import AdminSidebar from "@/components/AdminSidebar";
 
 const constructionTypes: GalleryPresentationType[] = [
   "Concept Render",
@@ -315,7 +316,10 @@ export default function AdminGalleryPage() {
   }
 
   return (
-    <section className="galleryAdminPage">
+    <section className="adminLight">
+      <AdminSidebar />
+      <main className="adminContent">
+        <section className="galleryAdminPage">
       <header className="galleryAdminHeader">
         <div>
           <span>ADMINISTRATION</span>
@@ -978,6 +982,8 @@ export default function AdminGalleryPage() {
           )}
         </aside>
       </div>
+        </section>
+      </main>
     </section>
   );
 }

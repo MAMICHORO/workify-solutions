@@ -14,6 +14,7 @@ import {
   type ProjectRecord,
 } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/client";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function AdminProjectsPage() {
   const router = useRouter();
@@ -179,23 +180,7 @@ export default function AdminProjectsPage() {
 
   return (
     <section className="adminLight">
-      <aside className="adminNav">
-        <div className="adminBrand">
-          WORKIFY<span>SOLUTIONS</span>
-        </div>
-        <a className="adminGallerySidebarLink" href="/admin">
-          Overview
-        </a>
-        <a className="adminGallerySidebarLink" href="/admin/projects">
-          Projects
-        </a>
-        <a className="adminGallerySidebarLink" href="/admin/gallery">
-          Gallery
-        </a>
-        <a href="/" className="backSite">
-          ← Public website
-        </a>
-      </aside>
+      <AdminSidebar />
 
       <main className="adminContent">
       <header className="adminHeader">
