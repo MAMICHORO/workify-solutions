@@ -6,259 +6,89 @@ import {
   useState,
 } from "react";
 
-type ProjectStatus =
-  | "Planned"
-  | "Active"
-  | "Completed";
-
-type Project = {
-  id: string;
-  number: string;
-  title: string;
-  category: string;
-  location: string;
-  status: ProjectStatus;
-  description: string;
-  scope: string[];
-  progress: number;
-};
-
-const defaultProjects: Project[] = [
-  {
-    id: "ridge-residence",
-    number: "01",
-    title: "Ridge Residence",
-    category: "Residential construction",
-    location: "Nairobi",
-    status: "Active",
-    description:
-      "Complete residential construction, site coordination and finishing.",
-    scope: [
-      "Site preparation",
-      "Structural construction",
-      "Electrical and plumbing coordination",
-      "Interior and exterior finishing",
-    ],
-    progress: 68,
-  },
-  {
-    id: "central-commercial-fitout",
-    number: "02",
-    title: "Central Commercial Fit-out",
-    category: "Commercial",
-    location: "Kiambu",
-    status: "Completed",
-    description:
-      "Commercial interior fit-out and building-services coordination.",
-    scope: [
-      "Interior partitioning",
-      "Ceiling and floor finishing",
-      "Electrical installation",
-      "Final inspection and handover",
-    ],
-    progress: 100,
-  },
-  {
-    id: "northline-external-works",
-    number: "03",
-    title: "Northline External Works",
-    category: "Civil works",
-    location: "Murang'a",
-    status: "Planned",
-    description:
-      "Drainage, paving and external civil works for a developing site.",
-    scope: [
-      "Drainage layout",
-      "Paving and walkways",
-      "Concrete works",
-      "Site finishing",
-    ],
-    progress: 15,
-  },
-];
-
-function readStoredProjects(): Project[] {
-  if (typeof window === "undefined") {
-    return defaultProjects;
-  }
-
-  const possibleKeys = [
-    "workify-projects",
-    "workify_projects",
-    "projects",
-  ];
-
-  for (const key of possibleKeys) {
-    try {
-      const stored = window.localStorage.getItem(key);
-
-      if (!stored) {
-        continue;
-      }
-
-      const parsed = JSON.parse(stored);
-
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        continue;
-      }
-
-      return parsed.map((project, index) => ({
-        id:
-          String(
-            project.id ??
-              project.slug ??
-              `project-${index + 1}`
-          ),
-
-        number:
-          String(
-            project.number ??
-              String(index + 1).padStart(2, "0")
-          ),
-
-        title:
-          String(
-            project.title ??
-              project.name ??
-              "Untitled project"
-          ),
-
-        category:
-          String(
-            project.category ??
-              project.type ??
-              "Construction"
-          ),
-
-        location:
-          String(
-            project.location ??
-              "Kenya"
-          ),
-
-        status:
-          (
-            ["Planned", "Active", "Completed"].includes(
-              project.status
-            )
-              ? project.status
-              : "Planned"
-          ) as ProjectStatus,
-
-        description:
-          String(
-            project.description ??
-              project.summary ??
-              "Project details will be added by the administrator."
-          ),
-
-        scope:
-          Array.isArray(project.scope)
-            ? project.scope
-            : [
-                "Project planning",
-                "Site coordination",
-                "Progress reporting",
-              ],
-
-        progress:
-          Number.isFinite(Number(project.progress))
-            ? Math.min(
-                100,
-                Math.max(
-                  0,
-                  Number(project.progress)
-                )
-              )
-            : project.status === "Completed"
-              ? 100
-              : project.status === "Active"
-                ? 50
-                : 10,
-      }));
-    } catch {
-      // Try the next possible storage key.
-    }
-  }
-
-  return defaultProjects;
-}
+import {
+  isPublicProject,
+  mapProject,
+  type ProjectRecord,
+} from "@/lib/projects";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ProjectsPage() {
+  const [supabase] = useState(createClient);
   const [projects, setProjects] =
-    useState<Project[]>(defaultProjects);
+    useState<ProjectRecord[]>([]);
 
   const [selectedId, setSelectedId] =
-    useState(defaultProjects[0].id);
+    useState("");
 
   const [filter, setFilter] =
     useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const storedProjects = readStoredProjects();
+    let mounted = true;
 
-    setProjects(storedProjects);
+    async function loadProjects() {
+      setLoading(true);
+      setError("");
 
-    if (storedProjects.length > 0) {
-  setSelectedId((currentId) =>
-    currentId || storedProjects[0].id
-  );
-}
+      const { data, error: queryError } =
+        await supabase
+          .from("projects")
+          .select("*");
 
-    function refreshProjects() {
-      const refreshedProjects =
-        readStoredProjects();
+      if (!mounted) return;
 
-      setProjects(refreshedProjects);
+      if (queryError) {
+        console.error(
+          "Unable to load public projects:",
+          queryError
+        );
+        setError(
+          "Projects are temporarily unavailable. Please try again later."
+        );
+        setProjects([]);
+      } else {
+        const records = (data ?? [])
+          .filter(isPublicProject)
+          .map(mapProject)
+          .filter(
+            (project): project is ProjectRecord =>
+              project !== null
+          );
 
-      if (
-        refreshedProjects.length > 0 &&
-        !refreshedProjects.some(
-          (project) =>
-            project.id === selectedId
-        )
-      ) {
-        setSelectedId(
-          refreshedProjects[0].id
+        setProjects(records);
+        setSelectedId((current) =>
+          records.some((record) => record.id === current)
+            ? current
+            : records[0]?.id ?? ""
         );
       }
+
+      setLoading(false);
     }
 
-    window.addEventListener(
-      "storage",
-      refreshProjects
-    );
-
-    window.addEventListener(
-      "workify-projects-updated",
-      refreshProjects
-    );
+    void loadProjects();
 
     return () => {
-      window.removeEventListener(
-        "storage",
-        refreshProjects
-      );
-
-      window.removeEventListener(
-        "workify-projects-updated",
-        refreshProjects
-      );
+      mounted = false;
     };
-  }, [selectedId]);
+  }, [supabase]);
 
   const categories = useMemo(() => {
-    return [
-      "All",
-      ...Array.from(
-        new Set(
-          projects.map(
-            (project) =>
-              project.category
-          )
-        )
-      ),
-    ];
+    const labels = new Map<string, string>();
+
+    projects.forEach((project) => {
+      const category = project.category.trim();
+
+      if (category) {
+        const key = category.toLocaleLowerCase();
+        if (!labels.has(key)) labels.set(key, category);
+      }
+    });
+
+    return ["All", ...labels.values()];
   }, [projects]);
 
   const filteredProjects = useMemo(() => {
@@ -268,7 +98,8 @@ export default function ProjectsPage() {
 
     return projects.filter(
       (project) =>
-        project.category === filter
+        project.category.toLocaleLowerCase() ===
+        filter.toLocaleLowerCase()
     );
   }, [filter, projects]);
 
@@ -290,7 +121,8 @@ export default function ProjectsPage() {
         ? projects[0]
         : projects.find(
             (project) =>
-              project.category === category
+              project.category.toLocaleLowerCase() ===
+              category.toLocaleLowerCase()
           );
 
     if (firstMatchingProject) {
@@ -345,8 +177,20 @@ export default function ProjectsPage() {
 
         <div className="projectsGalleryWorkspace">
           <div className="projectsGalleryList">
+            {loading && (
+              <div className="emptyProjectGallery">
+                Loading projects...
+              </div>
+            )}
+
+            {error && (
+              <div className="emptyProjectGallery">
+                {error}
+              </div>
+            )}
+
             {filteredProjects.map(
-              (project) => {
+              (project, index) => {
                 const active =
                   selectedProject?.id ===
                   project.id;
@@ -367,8 +211,14 @@ export default function ProjectsPage() {
                     }
                   >
                     <div className="projectCardVisual">
+                      {project.imageUrl && (
+                        <img
+                          src={project.imageUrl}
+                          alt={project.title}
+                        />
+                      )}
                       <span>
-                        {project.number}
+                        {String(index + 1).padStart(2, "0")}
                       </span>
 
                       <div className="projectArchitecturalShape shapeOne" />
@@ -377,9 +227,9 @@ export default function ProjectsPage() {
 
                     <div className="projectCardContent">
                       <div>
-                        <small>
-                          {project.category}
-                        </small>
+                        {project.category && (
+                          <small>{project.category}</small>
+                        )}
 
                         <h2>
                           {project.title}
@@ -387,15 +237,17 @@ export default function ProjectsPage() {
                       </div>
 
                       <div className="projectCardMeta">
-                        <span>
-                          {project.location}
-                        </span>
+                        {project.location && (
+                          <span>{project.location}</span>
+                        )}
 
-                        <b
-                          className={`status-${project.status.toLowerCase()}`}
-                        >
-                          {project.status}
-                        </b>
+                        {project.status && (
+                          <b
+                            className={`status-${project.status.toLowerCase()}`}
+                          >
+                            {project.status}
+                          </b>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -403,11 +255,13 @@ export default function ProjectsPage() {
               }
             )}
 
-            {filteredProjects.length ===
-              0 && (
+            {!loading &&
+              !error &&
+              filteredProjects.length === 0 && (
               <div className="emptyProjectGallery">
-                No projects are available in
-                this category.
+                {projects.length === 0
+                  ? "No projects have been published yet."
+                  : "No projects are available in this category."}
               </div>
             )}
           </div>
@@ -416,9 +270,12 @@ export default function ProjectsPage() {
             <aside className="projectDetailsPanel">
               <div className="projectDetailsVisual">
                 <div className="projectDetailNumber">
-                  {
-                    selectedProject.number
-                  }
+                  {String(
+                    projects.findIndex(
+                      (project) =>
+                        project.id === selectedProject.id
+                    ) + 1
+                  ).padStart(2, "0")}
                 </div>
 
                 <div className="projectDetailBuilding buildingLeft" />
@@ -439,64 +296,59 @@ export default function ProjectsPage() {
                     </h2>
                   </div>
 
-                  <b
-                    className={`status-${selectedProject.status.toLowerCase()}`}
-                  >
-                    {
-                      selectedProject.status
-                    }
-                  </b>
+                  {selectedProject.status && (
+                    <b
+                      className={`status-${selectedProject.status.toLowerCase()}`}
+                    >
+                      {selectedProject.status}
+                    </b>
+                  )}
                 </div>
 
                 <div className="projectDetailFacts">
-                  <div>
-                    <span>CATEGORY</span>
-                    <strong>
-                      {
-                        selectedProject.category
-                      }
-                    </strong>
-                  </div>
+                  {selectedProject.category && (
+                    <div>
+                      <span>CATEGORY</span>
+                      <strong>{selectedProject.category}</strong>
+                    </div>
+                  )}
 
-                  <div>
-                    <span>LOCATION</span>
-                    <strong>
-                      {
-                        selectedProject.location
-                      }
-                    </strong>
-                  </div>
+                  {selectedProject.location && (
+                    <div>
+                      <span>LOCATION</span>
+                      <strong>{selectedProject.location}</strong>
+                    </div>
+                  )}
 
-                  <div>
-                    <span>PROGRESS</span>
-                    <strong>
-                      {
-                        selectedProject.progress
-                      }
-                      %
-                    </strong>
-                  </div>
+                  {selectedProject.progress !== null && (
+                    <div>
+                      <span>PROGRESS</span>
+                      <strong>
+                        {selectedProject.progress}%
+                      </strong>
+                    </div>
+                  )}
                 </div>
 
-                <div className="projectProgressBar">
-                  <div
-                    style={{
-                      width: `${selectedProject.progress}%`,
-                    }}
-                  />
-                </div>
+                {selectedProject.progress !== null && (
+                  <div className="projectProgressBar">
+                    <div
+                      style={{
+                        width: `${selectedProject.progress}%`,
+                      }}
+                    />
+                  </div>
+                )}
 
-                <div className="projectDescription">
-                  <span>PROJECT OVERVIEW</span>
+                {selectedProject.description && (
+                  <div className="projectDescription">
+                    <span>PROJECT OVERVIEW</span>
+                    <p>{selectedProject.description}</p>
+                  </div>
+                )}
 
-                  <p>
-                    {
-                      selectedProject.description
-                    }
-                  </p>
-                </div>
-
-                <div className="projectScope">
+                {selectedProject.scope.length > 0 && (
+                  <div className="projectScope">
                   <span>SCOPE OF WORK</span>
 
                   <div>
@@ -517,7 +369,8 @@ export default function ProjectsPage() {
                       )
                     )}
                   </div>
-                </div>
+                  </div>
+                )}
 
                 <a
                   className="projectRequestButton"

@@ -387,7 +387,7 @@ export default function AdminGalleryPage() {
                     title: event.target.value,
                   })
                 }
-                placeholder="Example: Ridge Residence Foundation Stage"
+                placeholder="Enter the presentation title"
               />
             </label>
 
