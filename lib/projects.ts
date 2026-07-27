@@ -4,6 +4,7 @@ export type ProjectRecord = {
   category: string;
   location: string;
   status: string;
+  publicationStatus: string;
   progress: number | null;
   description: string;
   scope: string[];
@@ -51,6 +52,19 @@ function list(value: unknown): string[] {
 export function isPublicProject(
   row: RawProject
 ): boolean {
+  if (row.deleted_at != null) {
+    return false;
+  }
+
+  const publicationStatus = text(
+    row,
+    "publication_status"
+  ).toLowerCase();
+
+  if (publicationStatus) {
+    return publicationStatus === "published";
+  }
+
   for (const key of [
     "published",
     "is_public",
@@ -91,6 +105,10 @@ export function mapProject(
     category: text(row, "category", "project_type", "type"),
     location: text(row, "location"),
     status: text(row, "status"),
+    publicationStatus: text(
+      row,
+      "publication_status"
+    ),
     progress: Number.isFinite(numericProgress)
       ? Math.min(100, Math.max(0, numericProgress))
       : null,

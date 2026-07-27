@@ -30,7 +30,8 @@ export default function AdminProjectsPage() {
 
     const { data, error: queryError } = await supabase
       .from("projects")
-      .select("*");
+      .select("*")
+      .is("deleted_at", null);
 
     if (queryError) {
       console.error(
@@ -84,17 +85,28 @@ export default function AdminProjectsPage() {
 
     const form = event.currentTarget;
     const values = new FormData(form);
+    const title = String(values.get("title") ?? "").trim();
+    const slugBase = title
+      .toLocaleLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
     const { error: insertError } = await supabase
       .from("projects")
       .insert({
-        title: String(values.get("title") ?? "").trim(),
+        title,
+        slug: `${slugBase || "project"}-${Date.now()}`,
         category: String(values.get("category") ?? "").trim(),
         location: String(values.get("location") ?? "").trim(),
         description: String(
           values.get("description") ?? ""
         ).trim(),
-        status: "Active",
+        status: "active",
+        publication_status: String(
+          values.get("publicationStatus") ?? "draft"
+        ),
         progress: 0,
       });
 
@@ -138,7 +150,7 @@ export default function AdminProjectsPage() {
   async function deleteProject(project: ProjectRecord) {
     if (
       !window.confirm(
-        `Delete "${project.title}"? This cannot be undone.`
+        `Archive "${project.title}" and remove it from public view?`
       )
     ) {
       return;
@@ -148,7 +160,9 @@ export default function AdminProjectsPage() {
 
     const { error: deleteError } = await supabase
       .from("projects")
-      .delete()
+      .update({
+        deleted_at: new Date().toISOString(),
+      })
       .eq("id", project.id);
 
     if (deleteError) {
@@ -218,16 +232,26 @@ export default function AdminProjectsPage() {
             <div className="twoCol">
               <label>
                 Category
-                <input name="category" />
+                <input name="category" required />
               </label>
               <label>
                 Location
-                <input name="location" />
+                <input name="location" required />
               </label>
             </div>
             <label>
               Description
-              <textarea name="description" rows={4} />
+              <textarea name="description" rows={4} required />
+            </label>
+            <label>
+              Visibility
+              <select
+                name="publicationStatus"
+                defaultValue="draft"
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
             </label>
             <button type="submit">Save project</button>
           </form>
@@ -248,13 +272,14 @@ export default function AdminProjectsPage() {
               <th>Location</th>
               <th>Progress</th>
               <th>Status</th>
+              <th>Visibility</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {!loading && filteredProjects.length === 0 && (
               <tr>
-                <td colSpan={6} className="emptyCell">
+                <td colSpan={7} className="emptyCell">
                   No projects have been created.
                 </td>
               </tr>
@@ -262,7 +287,7 @@ export default function AdminProjectsPage() {
 
             {loading && (
               <tr>
-                <td colSpan={6} className="emptyCell">
+                <td colSpan={7} className="emptyCell">
                   Loading projects...
                 </td>
               </tr>
@@ -302,17 +327,37 @@ export default function AdminProjectsPage() {
                       })
                     }
                   >
-                    {!["Planned", "Active", "Completed"].includes(
+                    {![
+                      "planned",
+                      "active",
+                      "completed",
+                      "on_hold",
+                      "cancelled",
+                    ].includes(
                       project.status
                     ) &&
                       project.status && (
                         <option>{project.status}</option>
                       )}
-                    <option>Planned</option>
-                    <option>Active</option>
-                    <option>Completed</option>
-                    <option>Draft</option>
-                    <option>Archived</option>
+                    <option value="planned">Planned</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="on_hold">On hold</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </td>
+                <td>
+                  <select
+                    value={project.publicationStatus}
+                    onChange={(event) =>
+                      updateProject(project.id, {
+                        publication_status: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="archived">Archived</option>
                   </select>
                 </td>
                 <td>
