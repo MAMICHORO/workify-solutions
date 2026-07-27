@@ -790,6 +790,7 @@ export default function AdminGalleryPage() {
             setQuery(event.target.value)
           }
           placeholder="Search presentations"
+          aria-label="Search gallery presentations"
         />
 
         <strong>

@@ -3869,3 +3869,541 @@ body{background:var(--bg);color:var(--ink)}
   cursor: not-allowed;
   opacity: 0.65;
 }
+
+/* =========================================================
+   Admin experience refinement
+   ========================================================= */
+
+.adminLight {
+  --admin-radius: 14px;
+  --admin-border: #e2e5ea;
+  --admin-muted: #6f7888;
+  --admin-surface: #ffffff;
+  --admin-canvas: #f4f5f7;
+  --admin-shadow: 0 10px 30px rgba(31, 42, 68, 0.055);
+  background: var(--admin-canvas);
+}
+
+.adminLight .adminNav {
+  z-index: 20;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.adminNav nav {
+  width: 100%;
+}
+
+.adminNav nav a,
+.backSite {
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.adminNav nav a:focus-visible,
+.backSite:focus-visible,
+.adminLight button:focus-visible,
+.adminLight a:focus-visible,
+.adminLight input:focus-visible,
+.adminLight textarea:focus-visible,
+.adminLight select:focus-visible,
+.adminGoogleLoginButton:focus-visible {
+  outline: 3px solid rgba(242, 85, 50, 0.28);
+  outline-offset: 2px;
+}
+
+.backSite {
+  display: flex;
+  align-items: center;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.backSite:hover {
+  background: #f7f8fa;
+}
+
+.adminContent {
+  width: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.adminHeader {
+  min-height: 66px;
+}
+
+.adminHeader h1,
+.galleryAdminHeader h1,
+.adminRecruitmentHeader h1 {
+  font-size: clamp(32px, 4vw, 42px);
+  line-height: 1.05;
+}
+
+.eyebrow,
+.galleryAdminHeader > div > span,
+.adminRecruitmentHeader > div > span {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+.adminHeaderActions input,
+.adminRecruitmentToolbar input,
+.galleryAdminToolbar input {
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.adminHeaderActions button,
+.adminModal button[type="submit"],
+.galleryAdminHeader > button,
+.gallerySaveButton,
+.adminRecruitmentToolbar button {
+  min-height: 44px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.adminHeaderActions button:hover,
+.adminModal button[type="submit"]:hover,
+.galleryAdminHeader > button:hover,
+.gallerySaveButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgba(242, 85, 50, 0.2);
+}
+
+.adminLight button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.metric,
+.panel,
+.snapshot div,
+.galleryAdminForm,
+.galleryAdminTableWrap,
+.galleryAdminDetails,
+.adminRecruitmentCount,
+.adminRecruitmentTableWrap,
+.adminRecruitmentDetails {
+  border-color: var(--admin-border);
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
+}
+
+.metric {
+  min-height: 132px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metric strong {
+  line-height: 1;
+}
+
+.panel {
+  padding: 22px;
+}
+
+.panelTitle {
+  min-height: 30px;
+}
+
+.panelTitle h2 {
+  line-height: 1.25;
+}
+
+.adminLight table {
+  min-width: 680px;
+}
+
+.adminLight th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fafbfc;
+}
+
+.adminLight tbody tr {
+  transition: background-color 170ms ease;
+}
+
+.adminLight tbody tr:hover {
+  background: #fafbfc;
+}
+
+.adminLight td {
+  height: 58px;
+}
+
+.adminLight td a {
+  color: #3d536f;
+  text-underline-offset: 3px;
+}
+
+.adminLight select,
+.progressInput,
+.adminModal input,
+.adminModal textarea,
+.galleryAdminForm input,
+.galleryAdminForm select,
+.galleryAdminForm textarea {
+  min-height: 42px;
+  border-radius: 8px;
+  color: #172033;
+  font: inherit;
+  transition:
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    background-color 170ms ease;
+}
+
+.adminLight select:focus,
+.progressInput:focus,
+.adminModal input:focus,
+.adminModal textarea:focus,
+.galleryAdminForm input:focus,
+.galleryAdminForm select:focus,
+.galleryAdminForm textarea:focus {
+  border-color: #66758a;
+  box-shadow: 0 0 0 3px rgba(70, 88, 113, 0.12);
+  outline: none;
+}
+
+.dangerText,
+.adminDeleteRecruitment {
+  border-radius: 7px;
+  font-weight: 750;
+  transition: background-color 170ms ease, color 170ms ease;
+}
+
+.dangerText {
+  padding: 8px 10px;
+}
+
+.dangerText:hover {
+  background: #fff0f0;
+}
+
+.emptyCell,
+.galleryEmptyRow,
+.emptyRecruitmentTable {
+  height: 180px !important;
+  padding: 42px 24px !important;
+  color: var(--admin-muted);
+  line-height: 1.6;
+}
+
+.emptyCell strong,
+.emptyCell span {
+  display: block;
+}
+
+.emptyCell strong {
+  margin-bottom: 5px;
+  color: #263248;
+  font-size: 15px;
+}
+
+.emptyCell span {
+  font-size: 12px;
+}
+
+.adminSkeleton {
+  width: min(430px, 78%);
+  height: 12px;
+  margin: auto;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eceff3 25%, #f8f9fb 50%, #eceff3 75%);
+  background-size: 200% 100%;
+  animation: adminSkeletonPulse 1.25s ease-in-out infinite;
+}
+
+@keyframes adminSkeletonPulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.modalBackdrop {
+  backdrop-filter: blur(3px);
+}
+
+.adminModal {
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 35px 90px rgba(16, 24, 40, 0.3);
+}
+
+.modalClose {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #586273;
+  line-height: 1;
+}
+
+.modalClose:hover {
+  background: #f0f2f5;
+  color: #172033;
+}
+
+.galleryAdminPage,
+.adminRecruitmentPage {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.galleryAdminHeader,
+.adminRecruitmentHeader {
+  min-height: 66px;
+  align-items: center;
+}
+
+.galleryAdminHeader h1,
+.adminRecruitmentHeader h1 {
+  margin: 4px 0 8px;
+}
+
+.galleryAdminHeader p,
+.adminRecruitmentHeader p {
+  max-width: 720px;
+  line-height: 1.55;
+}
+
+.galleryAdminForm {
+  padding: 26px;
+}
+
+.galleryAdminTableWrap,
+.adminRecruitmentTableWrap {
+  overflow: auto;
+}
+
+.galleryAdminTable th,
+.adminRecruitmentTable th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.publicationBadge {
+  min-width: 76px;
+  min-height: 32px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.galleryTableActions button,
+.adminRecruitmentTable button,
+.galleryAdminDetails > button {
+  border-radius: 7px;
+  transition:
+    background-color 170ms ease,
+    color 170ms ease,
+    border-color 170ms ease;
+}
+
+.galleryAdminDetails,
+.adminRecruitmentDetails {
+  top: 28px;
+}
+
+.profileHero,
+.profileCard {
+  border-color: var(--admin-border, #e2e5ea);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(31, 42, 68, 0.055);
+}
+
+.profileHero h1 {
+  font-size: clamp(32px, 5vw, 42px);
+  line-height: 1.05;
+}
+
+.profileCard {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.profileCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 38px rgba(31, 42, 68, 0.08);
+}
+
+.adminGoogleLoginButton {
+  border-radius: 9px;
+}
+
+@media (max-width: 1180px) {
+  .galleryAdminWorkspace,
+  .adminRecruitmentWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .galleryAdminDetails,
+  .adminRecruitmentDetails {
+    position: static;
+    min-height: 0;
+  }
+
+  .galleryAdminFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .galleryImageEditor {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .adminLight {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .adminLight .adminNav {
+    position: static;
+    height: auto;
+    padding: 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .adminBrand {
+    padding: 5px 8px 18px;
+  }
+
+  .adminNav nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .backSite {
+    margin-top: 14px;
+    padding: 14px 8px 0;
+  }
+
+  .adminContent {
+    padding: 24px 16px 40px;
+  }
+
+  .adminHeader,
+  .galleryAdminHeader,
+  .adminRecruitmentHeader,
+  .galleryFormHeading,
+  .galleryUploadHeading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .adminHeaderActions,
+  .adminRecruitmentToolbar,
+  .galleryAdminToolbar {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adminHeaderActions input,
+  .adminRecruitmentToolbar input,
+  .galleryAdminToolbar input {
+    width: 100%;
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric {
+    min-height: 112px;
+  }
+
+  .overviewGrid {
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .twoCol,
+  .galleryAdminFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .galleryWideField {
+    grid-column: auto;
+  }
+
+  .galleryImageEditor {
+    grid-template-columns: 1fr;
+  }
+
+  .galleryAdminForm {
+    padding: 20px 16px;
+  }
+
+  .galleryAdminToolbar strong {
+    align-self: flex-start;
+  }
+
+  .profilePage {
+    padding: 40px 16px;
+  }
+
+  .profileHero {
+    padding: 28px 22px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profileGrid {
+    margin-top: 20px;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .adminNav nav {
+    grid-template-columns: 1fr;
+  }
+
+  .adminHeader h1,
+  .galleryAdminHeader h1,
+  .adminRecruitmentHeader h1 {
+    font-size: 30px;
+  }
+
+  .adminModal {
+    padding: 26px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adminLight *,
+  .profileCard,
+  .adminGoogleLoginButton {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -13,6 +13,7 @@ import {
   RecruitmentRequestStatus,
   updateRecruitmentRequestStatus,
 } from "@/lib/recruitmentRequests";
+import AdminSidebar from "@/components/AdminSidebar";
 
 const statuses: RecruitmentRequestStatus[] = [
   "New",
@@ -128,7 +129,10 @@ export default function AdminRecruitmentRequestsPage() {
   }
 
   return (
-    <section className="adminRecruitmentPage">
+    <section className="adminLight">
+      <AdminSidebar />
+      <main className="adminContent">
+        <section className="adminRecruitmentPage">
       <div className="adminRecruitmentHeader">
         <div>
           <span>ADMINISTRATION</span>
@@ -154,6 +158,7 @@ export default function AdminRecruitmentRequestsPage() {
             setQuery(event.target.value)
           }
           placeholder="Search organization, position, sector or status"
+          aria-label="Search recruitment requests"
         />
 
         <button
@@ -416,6 +421,8 @@ export default function AdminRecruitmentRequestsPage() {
           )}
         </aside>
       </div>
+        </section>
+      </main>
     </section>
   );
 }

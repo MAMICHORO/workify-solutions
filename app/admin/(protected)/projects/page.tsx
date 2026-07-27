@@ -194,6 +194,7 @@ export default function AdminProjectsPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search projects"
+            aria-label="Search projects"
           />
           <button
             type="button"
@@ -265,7 +266,10 @@ export default function AdminProjectsPage() {
             {!loading && filteredProjects.length === 0 && (
               <tr>
                 <td colSpan={7} className="emptyCell">
-                  No projects have been created.
+                  <strong>No projects available</strong>
+                  <span>
+                    Create a project to start building the live portfolio.
+                  </span>
                 </td>
               </tr>
             )}
@@ -273,7 +277,7 @@ export default function AdminProjectsPage() {
             {loading && (
               <tr>
                 <td colSpan={7} className="emptyCell">
-                  Loading projects...
+                  <span className="adminSkeleton" aria-label="Loading projects" />
                 </td>
               </tr>
             )}

@@ -23,7 +23,7 @@ export default async function ProfilePage() {
               user.user_metadata.avatar_url ??
               "/images/default-avatar.png"
             }
-            alt=""
+            alt={`${user.user_metadata.full_name ?? "Workify user"} profile`}
             className="profileAvatar"
           />
 
