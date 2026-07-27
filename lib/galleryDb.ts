@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 
 export type GalleryDivision = "Construction" | "Recruitment";
+type GalleryDivisionValue = "construction" | "recruitment";
 
 export type GalleryPresentationType =
   | "Concept Render"
@@ -78,6 +79,26 @@ const BUCKET = "gallery-images";
 const DATABASE_NAME = "workify-gallery-database";
 const STORE_NAME = "gallery-items";
 const DATABASE_VERSION = 1;
+
+export function normalizeGalleryDivision(
+  division: GalleryDivision | string
+): GalleryDivisionValue {
+  const normalized = division.trim().toLocaleLowerCase();
+
+  if (normalized === "construction" || normalized === "recruitment") {
+    return normalized;
+  }
+
+  throw new Error(`Unsupported gallery division: ${division}`);
+}
+
+function mapGalleryDivision(
+  division: GalleryDivisionValue | string
+): GalleryDivision {
+  return normalizeGalleryDivision(division) === "construction"
+    ? "Construction"
+    : "Recruitment";
+}
 
 function toStatus(
   status: GalleryRow["publication_status"]
@@ -190,7 +211,7 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
     return {
       id: row.id,
       title: row.title,
-      division: row.division as GalleryDivision,
+      division: mapGalleryDivision(row.division),
       presentationType:
         row.presentation_type as GalleryPresentationType,
       location: row.location ?? "",
@@ -227,7 +248,7 @@ export async function saveGalleryItem(item: GalleryItem): Promise<void> {
 
   const values = {
     title: item.title,
-    division: item.division,
+    division: normalizeGalleryDivision(item.division),
     presentation_type: item.presentationType,
     location: item.location || null,
     client_sector: item.clientSector || null,
