@@ -163,7 +163,11 @@ async function getLegacyGalleryItems(): Promise<GalleryItem[]> {
   });
 }
 
-export async function getGalleryItems(): Promise<GalleryItem[]> {
+export async function getGalleryItems({
+  publicDelivery = false,
+}: {
+  publicDelivery?: boolean;
+} = {}): Promise<GalleryItem[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("gallery_presentations")
@@ -183,7 +187,7 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
   );
   const signedUrls = new Map<string, string>();
 
-  if (paths.length > 0) {
+  if (!publicDelivery && paths.length > 0) {
     const { data: signed, error: signedError } = await supabase.storage
       .from(BUCKET)
       .createSignedUrls(paths, 60 * 60);
@@ -203,8 +207,9 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
       .map((image) => ({
         id: image.id,
         name: image.caption || image.storage_path.split("/").pop() || "Image",
-        dataUrl:
-          signedUrls.get(image.storage_path) ?? image.public_url ?? "",
+        dataUrl: publicDelivery
+          ? `/api/gallery-media/${image.id}`
+          : signedUrls.get(image.storage_path) ?? image.public_url ?? "",
         storagePath: image.storage_path,
       }));
 
@@ -321,6 +326,7 @@ export async function saveGalleryItem(item: GalleryItem): Promise<void> {
         .from(BUCKET)
         .upload(storagePath, blob, {
           contentType: blob.type || "image/jpeg",
+          cacheControl: "31536000",
           upsert: false,
         });
 

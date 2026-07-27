@@ -3250,6 +3250,7 @@ body{background:var(--bg);color:var(--ink)}
 }
 
 .presentationThumbnails button {
+  position: relative;
   height: 75px;
   overflow: hidden;
   padding: 0;
@@ -3723,6 +3724,37 @@ body{background:var(--bg);color:var(--ink)}
     text-decoration:none;
     color:#111;
     font-weight:600;
+}
+
+.galleryImagePlaceholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(225, 225, 220, 0.88) 20%,
+      rgba(244, 244, 240, 0.96) 40%,
+      rgba(225, 225, 220, 0.88) 60%
+    );
+  background-size: 220% 100%;
+  color: #73777c;
+  font-size: 11px;
+  font-weight: 750;
+  animation: galleryImageLoading 1.25s ease-in-out infinite;
+}
+
+.galleryImagePlaceholder.failed {
+  background: #ecece8;
+  animation: none;
+}
+
+@keyframes galleryImageLoading {
+  to {
+    background-position: -220% 0;
+  }
 }
 
 .projectCardVisual > img {

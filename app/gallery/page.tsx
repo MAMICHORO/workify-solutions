@@ -10,6 +10,7 @@ import {
   GalleryItem,
   getGalleryItems,
 } from "@/lib/galleryDb";
+import OptimizedGalleryImage from "@/components/OptimizedGalleryImage";
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -25,7 +26,9 @@ export default function GalleryPage() {
     setError("");
 
     try {
-      const records = (await getGalleryItems()).filter(
+      const records = (
+        await getGalleryItems({ publicDelivery: true })
+      ).filter(
         (item) => item.status.toLocaleLowerCase() === "published"
       );
 
@@ -201,9 +204,10 @@ export default function GalleryPage() {
                   >
                     <div className="presentationCardImage">
                       {cover && (
-                        <img
+                        <OptimizedGalleryImage
                           src={cover.dataUrl}
                           alt={item.title}
+                          sizes="(max-width: 760px) 100vw, (max-width: 1200px) 42vw, 520px"
                         />
                       )}
 
@@ -247,9 +251,11 @@ export default function GalleryPage() {
 
                 <div className="presentationMainImage">
                   {activeImage && (
-                    <img
+                    <OptimizedGalleryImage
                       src={activeImage.dataUrl}
                       alt={selectedItem.title}
+                      sizes="(max-width: 760px) 100vw, (max-width: 1200px) 60vw, 1100px"
+                      priority
                     />
                   )}
 
@@ -280,9 +286,10 @@ export default function GalleryPage() {
                             setActiveImageIndex(index)
                           }
                         >
-                          <img
+                          <OptimizedGalleryImage
                             src={image.dataUrl}
                             alt={`${selectedItem.title} ${index + 1}`}
+                            sizes="(max-width: 760px) 20vw, 150px"
                           />
                         </button>
                       )
