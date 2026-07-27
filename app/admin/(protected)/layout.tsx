@@ -10,11 +10,13 @@ export default async function AdminLayout({
   const supabase = await createClient();
 
   const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+    data: claimsData,
+    error: claimsError,
+  } = await supabase.auth.getClaims();
 
-  if (userError || !user) {
+  const userId = claimsData?.claims?.sub;
+
+  if (claimsError || !userId) {
     redirect("/admin/login");
   }
 
@@ -24,7 +26,7 @@ export default async function AdminLayout({
   } = await supabase
     .from("profiles")
     .select("role, active")
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
 
   const isAdministrator =
