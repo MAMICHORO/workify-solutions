@@ -21,7 +21,7 @@ export default function RequestForm({
 }: RequestFormProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
+  const [supabase] = useState(createClient);
 
   const [requestType, setRequestType] =
     useState(defaultType);

@@ -17,7 +17,7 @@ export default async function AdminLayout({
   const userId = claimsData?.claims?.sub;
 
   if (claimsError || !userId) {
-    redirect("/admin/login");
+    redirect("/login");
   }
 
   const {

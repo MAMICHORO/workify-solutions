@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { getSafePublicReturnPath } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const returnTo = getSafePublicReturnPath(
+    requestUrl.searchParams.get("next")
+  );
 
   if (!code) {
     return NextResponse.redirect(
@@ -82,7 +86,7 @@ export async function GET(request: Request) {
 
   const destination = isAdministrator
     ? "/admin"
-    : "/profile";
+    : returnTo ?? "/profile";
 
   return NextResponse.redirect(
     new URL(destination, requestUrl.origin)

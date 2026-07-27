@@ -4,10 +4,12 @@ import {
   FormEvent,
   useState,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   addRecruitmentRequest,
 } from "@/lib/recruitmentRequests";
+import { createClient } from "@/lib/supabase/client";
 
 const availableServices = [
   "Job advertising",
@@ -22,6 +24,9 @@ const availableServices = [
 ];
 
 export default function RecruitmentRequestForm() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [supabase] = useState(createClient);
   const [selectedServices, setSelectedServices] =
     useState<string[]>([]);
 
@@ -37,13 +42,27 @@ export default function RecruitmentRequestForm() {
     );
   }
 
-  function submitRequest(
+  async function submitRequest(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
     setError("");
     setSubmitted(false);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      const nextPath = encodeURIComponent(
+        pathname || "/recruitment/request"
+      );
+
+      router.push(`/login?next=${nextPath}`);
+      return;
+    }
 
     if (selectedServices.length === 0) {
       setError(

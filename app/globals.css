@@ -3726,6 +3726,16 @@ body{background:var(--bg);color:var(--ink)}
     font-weight:600;
 }
 
+.navAccountLink{
+    color:#444;
+    font-size:14px;
+    font-weight:700;
+}
+
+.navAccountLink:hover{
+    color:#000;
+}
+
 .navAvatar{
     width:36px;
     height:36px;

@@ -1,9 +1,16 @@
 import { redirect } from "next/navigation";
 
 import LoginForm from "@/app/admin/login/LoginForm";
+import { getSafePublicReturnPath } from "@/lib/auth-redirect";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function AdminLoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const params = await searchParams;
+  const returnTo = getSafePublicReturnPath(params.next);
   const supabase = await createClient();
 
   const {
@@ -25,7 +32,7 @@ export default async function AdminLoginPage() {
       redirect("/admin");
     }
 
-    redirect("/profile");
+    redirect(returnTo ?? "/profile");
   }
 
   return (
@@ -33,32 +40,33 @@ export default async function AdminLoginPage() {
       <section className="publicLoginShell">
         <div className="publicLoginIntroduction">
           <p className="publicLoginEyebrow">
-            SECURE ADMINISTRATION
+            SECURE ACCOUNT ACCESS
           </p>
 
           <h1>
-            Manage Workify Nexus operations.
+            Continue with your Workify account.
           </h1>
 
           <p className="publicLoginDescription">
-            Sign in to manage projects, recruitment requests,
-            gallery presentations and administrative records.
+            Sign in with Google to submit requests, review
+            your profile and access the services available
+            to your account.
           </p>
 
           <div className="publicLoginBenefits">
             <div>
               <span>01</span>
-              Review submitted requests
+              Submit service requests securely
             </div>
 
             <div>
               <span>02</span>
-              Manage construction and recruitment
+              Keep your account details together
             </div>
 
             <div>
               <span>03</span>
-              Control administrative records
+              Access the correct workspace automatically
             </div>
           </div>
         </div>
@@ -66,20 +74,21 @@ export default async function AdminLoginPage() {
         <div className="publicLoginCard">
           <div className="publicLoginBrand">
             WORKIFY
-            <span>ADMINISTRATION</span>
+            <span>NEXUS</span>
           </div>
 
           <h2>Welcome back.</h2>
 
           <p className="publicLoginCardText">
-            Continue securely using the approved Workify Google
-            account or administrator email credentials.
+            Use the Google account you want associated with
+            your Workify Nexus profile.
           </p>
 
-          <LoginForm />
+          <LoginForm returnTo={returnTo ?? undefined} />
 
           <p className="publicLoginNotice">
-            Access is restricted to approved Workify administrators.
+            Administrators and customers use this same secure
+            sign-in. Access is determined by the account profile.
           </p>
         </div>
       </section>

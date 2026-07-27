@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,37 +23,84 @@ const links = [
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
-
+  const [supabase] = useState(createClient);
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  const supabase = createClient();
+  const [account, setAccount] = useState<{
+    user: User;
+    isAdministrator: boolean;
+  } | null>(null);
+  const accountRequest = useRef(0);
 
   useEffect(() => {
-    async function loadUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    let mounted = true;
 
-      setUser(user);
+    async function loadAccount(user: User | null) {
+      const request = ++accountRequest.current;
+
+      if (!user) {
+        if (mounted) {
+          setAccount(null);
+        }
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, active")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (
+        mounted &&
+        request === accountRequest.current
+      ) {
+        setAccount({
+          user,
+          isAdministrator:
+            profile?.role === "super_admin" &&
+            profile?.active === true,
+        });
+      }
     }
 
-    loadUser();
+    void supabase.auth.getSession().then(
+      ({
+        data: { session },
+      }) => loadAccount(session?.user ?? null)
+    );
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (
+          event === "INITIAL_SESSION" ||
+          event === "SIGNED_IN" ||
+          event === "SIGNED_OUT" ||
+          event === "TOKEN_REFRESHED"
+        ) {
+          window.setTimeout(() => {
+            void loadAccount(session?.user ?? null);
+          }, 0);
+        }
+      }
+    );
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   async function handleLogout() {
+    ++accountRequest.current;
+    setAccount(null);
+    setOpen(false);
+
     await supabase.auth.signOut();
 
-    router.refresh();
     router.push("/");
+    router.refresh();
   }
 
   if (pathname.startsWith("/admin")) return null;
@@ -91,7 +143,7 @@ export default function Header() {
             Start a request
           </Link>
 
-          {!user ? (
+          {!account ? (
             <Link
               href="/login"
               className="navLogin"
@@ -102,30 +154,44 @@ export default function Header() {
           ) : (
             <div className="navUser">
 
-              <Link
-                href="/profile"
+              <div
                 className="navProfile"
-                onClick={() => setOpen(false)}
               >
-                {user.user_metadata?.avatar_url ? (
+                {account.user.user_metadata?.avatar_url ? (
                   <img
-                    src={user.user_metadata.avatar_url}
+                    src={
+                      account.user.user_metadata.avatar_url
+                    }
                     alt=""
                     className="navAvatar"
                   />
                 ) : (
                   <div className="navAvatarFallback">
-                    {(user.user_metadata?.full_name ||
-                      user.email ||
+                    {(account.user.user_metadata?.full_name ||
+                      account.user.email ||
                       "U")[0].toUpperCase()}
                   </div>
                 )}
 
                 <span>
-                  {user.user_metadata?.given_name ||
-                    user.user_metadata?.full_name ||
-                    user.email}
+                  {account.user.user_metadata?.given_name ||
+                    account.user.user_metadata?.full_name ||
+                    account.user.email}
                 </span>
+              </div>
+
+              <Link
+                href={
+                  account.isAdministrator
+                    ? "/admin"
+                    : "/profile"
+                }
+                className="navAccountLink"
+                onClick={() => setOpen(false)}
+              >
+                {account.isAdministrator
+                  ? "Dashboard"
+                  : "Profile"}
               </Link>
 
               <button
