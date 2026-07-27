@@ -3380,3 +3380,475 @@ body{background:var(--bg);color:var(--ink)}
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.adminLoginMethods {
+  display: grid;
+  gap: 20px;
+}
+
+.adminGoogleLoginButton {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #d8d8d8;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adminGoogleLoginButton:hover {
+  background: #f5f5f5;
+}
+
+.adminGoogleLoginButton:disabled,
+.adminLoginButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.adminLoginDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #777777;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.adminLoginDivider::before,
+.adminLoginDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dddddd;
+}
+
+.adminLoginDivider span {
+  white-space: nowrap;
+}
+.publicLoginPage {
+  min-height: calc(100vh - 160px);
+  padding: 72px 24px;
+  background: #efefec;
+  display: grid;
+  place-items: center;
+}
+
+.publicLoginShell {
+  width: min(1040px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 460px;
+  background: #ffffff;
+  border: 1px solid #d8d8d4;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.1);
+}
+
+.publicLoginIntroduction {
+  padding: 64px;
+  background: #111214;
+  color: #ffffff;
+}
+
+.publicLoginEyebrow {
+  margin: 0 0 22px;
+  color: #f25532;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.publicLoginIntroduction h1 {
+  max-width: 520px;
+  margin: 0;
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.publicLoginDescription {
+  max-width: 500px;
+  margin: 28px 0 48px;
+  color: #b9b9b9;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.publicLoginBenefits {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid #333436;
+}
+
+.publicLoginBenefits div {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 20px 0;
+  border-bottom: 1px solid #333436;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.publicLoginBenefits span {
+  color: #f25532;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.publicLoginCard {
+  padding: 60px 48px;
+  align-self: center;
+}
+
+.publicLoginBrand {
+  margin-bottom: 46px;
+  color: #111111;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.publicLoginBrand span {
+  display: block;
+  margin-top: 2px;
+  color: #777777;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.publicLoginCard h2 {
+  margin: 0;
+  color: #111111;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.publicLoginCardText {
+  margin: 16px 0 32px;
+  color: #686868;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.publicLoginNotice {
+  margin: 22px 0 0;
+  color: #777777;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.adminLoginMethods {
+  display: grid;
+  gap: 22px;
+}
+
+.adminGoogleLoginButton {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1px solid #cfcfcb;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.adminGoogleLoginButton:hover {
+  background: #f4f4f1;
+  border-color: #111111;
+}
+
+.adminLoginDivider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #888888;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.adminLoginDivider::before,
+.adminLoginDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddddda;
+}
+
+.adminLoginDivider span {
+  white-space: nowrap;
+}
+
+.adminLoginForm {
+  display: grid;
+  gap: 18px;
+}
+
+.adminLoginField {
+  display: grid;
+  gap: 8px;
+}
+
+.adminLoginField label {
+  color: #222222;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.adminLoginField input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #cfcfcb;
+  border-radius: 0;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  outline: none;
+}
+
+.adminLoginField input:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 1px #111111;
+}
+
+.adminLoginButton {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid #f25532;
+  background: #f25532;
+  color: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.adminLoginButton:hover {
+  background: #dc4325;
+  border-color: #dc4325;
+}
+
+.adminGoogleLoginButton:disabled,
+.adminLoginButton:disabled,
+.adminLoginField input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.adminLoginError {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #d94735;
+  background: #fff2f0;
+  color: #a12618;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .publicLoginPage {
+    padding: 32px 16px;
+  }
+
+  .publicLoginShell {
+    grid-template-columns: 1fr;
+  }
+
+  .publicLoginIntroduction {
+    padding: 44px 30px;
+  }
+
+  .publicLoginCard {
+    padding: 44px 30px;
+  }
+
+  .publicLoginIntroduction h1 {
+    font-size: 48px;
+  }
+}
+
+@media (max-width: 520px) {
+  .publicLoginIntroduction h1 {
+    font-size: 40px;
+  }
+
+  .publicLoginCard h2 {
+    font-size: 32px;
+  }
+
+  .adminLoginDivider span {
+    white-space: normal;
+    text-align: center;
+  }
+}
+.navLogin{
+    margin-left:20px;
+    padding:11px 18px;
+    border:1px solid #111;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    color:#111;
+    transition:.2s;
+}
+
+.navLogin:hover{
+    background:#111;
+    color:#fff;
+}
+
+.navUser{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-left:20px;
+}
+
+.navProfile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:#111;
+    font-weight:600;
+}
+
+.navAvatar{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.navAvatarFallback{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:#111;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+
+.navLogout{
+    border:none;
+    background:none;
+    cursor:pointer;
+    color:#d33;
+    font-weight:700;
+}
+
+.navLogout:hover{
+    color:#000;
+}
+.profilePage{
+    background:#f4f4f1;
+    min-height:100vh;
+    padding:80px 24px;
+}
+
+.profileContainer{
+    max-width:1200px;
+    margin:auto;
+}
+
+.profileHero{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    background:#fff;
+    padding:40px;
+    border:1px solid #ddd;
+}
+
+.profileAvatar{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.profileHero h1{
+    margin:0;
+    font-size:42px;
+}
+
+.profileHero p{
+    margin-top:10px;
+    color:#666;
+}
+
+.profileGrid{
+    margin-top:40px;
+    display:grid;
+    gap:24px;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+
+.profileCard{
+    background:#fff;
+    border:1px solid #ddd;
+    padding:30px;
+}
+
+.profileCard h3{
+    margin:0;
+}
+
+.profileCard p{
+    margin-top:18px;
+    font-size:42px;
+    font-weight:700;
+}
+.workifyRequestLoginRequired {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid #e2b7ac;
+  background: #fff4f1;
+}
+
+.workifyRequestLoginRequired strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #111;
+  font-size: 14px;
+}
+
+.workifyRequestLoginRequired p {
+  margin: 0 0 14px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.workifyRequestLoginRequired button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.workifyRequestSubmit:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

@@ -5,7 +5,9 @@ import {
   useEffect,
   useState,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
+import { createClient } from "@/lib/supabase/client";
 import { store } from "@/lib/store";
 
 type RequestFormProps = {
@@ -17,6 +19,10 @@ export default function RequestForm({
   defaultType = "",
   defaultProject = "",
 }: RequestFormProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const supabase = createClient();
+
   const [requestType, setRequestType] =
     useState(defaultType);
 
@@ -26,87 +32,181 @@ export default function RequestForm({
   const [error, setError] =
     useState("");
 
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [isCheckingUser, setIsCheckingUser] =
+    useState(true);
+
+  const [isSignedIn, setIsSignedIn] =
+    useState(false);
+
   useEffect(() => {
     setRequestType(defaultType);
   }, [defaultType]);
 
-  function submitRequest(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
+  useEffect(() => {
+    let mounted = true;
 
-    setSubmitted(false);
-    setError("");
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+      if (mounted) {
+        setIsSignedIn(Boolean(user));
+        setIsCheckingUser(false);
+      }
+    }
 
-    const name = String(
-      formData.get("name") ?? ""
-    ).trim();
+    checkUser();
 
-    const phone = String(
-      formData.get("phone") ?? ""
-    ).trim();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsSignedIn(Boolean(session?.user));
+        setIsCheckingUser(false);
+      }
+    );
 
-    const email = String(
-      formData.get("email") ?? ""
-    ).trim();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
-    const organization = String(
-      formData.get("organization") ?? ""
-    ).trim();
+  async function submitRequest(
+  event: FormEvent<HTMLFormElement>
+) {
+  event.preventDefault();
 
-    const location = String(
-      formData.get("location") ?? ""
-    ).trim();
+  // <-- ADD THIS LINE HERE
+  const form = event.currentTarget;
 
-    const startDate = String(
-      formData.get("startDate") ?? ""
-    ).trim();
+  setSubmitted(false);
+  setError("");
 
-    const description = String(
-      formData.get("description") ?? ""
-    ).trim();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-    if (
-      !name ||
-      !phone ||
-      !requestType ||
-      !location ||
-      !description
-    ) {
-      setError(
-        "Complete all required fields before submitting."
+    if (userError || !user) {
+      const nextPath = encodeURIComponent(
+        pathname || "/contact"
       );
 
+      router.push(`/login?next=${nextPath}`);
       return;
     }
 
-    const existingEnquiries = store.enquiries();
+    setIsSubmitting(true);
 
-store.saveEnquiries([
-  {
-    id:
-      typeof crypto !== "undefined" &&
-      typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `enquiry-${Date.now()}`,
+    try {
+      const formData = new FormData(form);
 
-    name,
-    phone,
-    email,
-    organization,
-    service: requestType,
-    location,
-    details: defaultProject
-      ? `Project: ${defaultProject}\n\n${description}`
-      : description,
-    status: "New",
-    createdAt: new Date().toISOString(),
-  },
-  ...existingEnquiries,
-]);
+      const name = String(
+        formData.get("name") ?? ""
+      ).trim();
+
+      const phone = String(
+        formData.get("phone") ?? ""
+      ).trim();
+
+      const email = String(
+        formData.get("email") ?? ""
+      ).trim();
+
+      const organization = String(
+        formData.get("organization") ?? ""
+      ).trim();
+
+      const location = String(
+        formData.get("location") ?? ""
+      ).trim();
+
+      const startDate = String(
+        formData.get("startDate") ?? ""
+      ).trim();
+
+      const description = String(
+        formData.get("description") ?? ""
+      ).trim();
+
+      if (
+        !name ||
+        !phone ||
+        !requestType ||
+        !location ||
+        !description
+      ) {
+        setError(
+          "Complete all required fields before submitting."
+        );
+        return;
+      }
+
+      const existingEnquiries =
+        store.enquiries();
+
+      store.saveEnquiries([
+        {
+          id:
+            typeof crypto !== "undefined" &&
+            typeof crypto.randomUUID === "function"
+              ? crypto.randomUUID()
+              : `enquiry-${Date.now()}`,
+
+          name,
+          phone,
+          email: email || user.email || "",
+          organization,
+          service: requestType,
+          location,
+          details: [
+            defaultProject
+              ? `Project: ${defaultProject}`
+              : "",
+            startDate
+              ? `Expected start date: ${startDate}`
+              : "",
+            description,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          status: "New",
+          createdAt: new Date().toISOString(),
+        },
+        ...existingEnquiries,
+      ]);
+
+      setSubmitted(true);
+      form.reset();
+      setRequestType(defaultType);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } catch (err) {
+  console.error(err);
+
+  setError(
+    "The request could not be submitted. Please try again."
+  );
+} 
+    finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleLoginRequired() {
+    const nextPath = encodeURIComponent(
+      pathname || "/contact"
+    );
+
+    router.push(`/login?next=${nextPath}`);
   }
 
   return (
@@ -129,6 +229,24 @@ store.saveEnquiries([
         )}
       </div>
 
+      {!isCheckingUser && !isSignedIn && (
+        <div className="workifyRequestLoginRequired">
+          <strong>Sign in before submitting.</strong>
+
+          <p>
+            You may complete the form, but you must log in
+            before the request can be sent.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleLoginRequired}
+          >
+            Login or create an account
+          </button>
+        </div>
+      )}
+
       {submitted && (
         <div className="workifyRequestSuccess">
           Your request has been submitted successfully.
@@ -138,7 +256,10 @@ store.saveEnquiries([
       )}
 
       {error && (
-        <div className="workifyRequestError">
+        <div
+          className="workifyRequestError"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -167,7 +288,7 @@ store.saveEnquiries([
           <input
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="Enter your email address"
           />
         </label>
 
@@ -250,13 +371,14 @@ store.saveEnquiries([
           Supporting documents
           <input
             type="file"
+            name="documents"
             multiple
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
           />
 
           <small>
-            Document storage will be connected to
-            Supabase during backend integration.
+            Document upload is not active yet. We will
+            connect it to Supabase Storage next.
           </small>
         </label>
       </div>
@@ -276,8 +398,15 @@ store.saveEnquiries([
       <button
         className="workifyRequestSubmit"
         type="submit"
+        disabled={isCheckingUser || isSubmitting}
       >
-        Submit request
+        {isCheckingUser
+          ? "Checking account..."
+          : isSubmitting
+            ? "Submitting..."
+            : isSignedIn
+              ? "Submit request"
+              : "Login to submit"}
       </button>
     </form>
   );

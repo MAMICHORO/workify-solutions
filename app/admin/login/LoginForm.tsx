@@ -9,13 +9,39 @@ export default function LoginForm() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [email, setEmail] = useState(
-    "workify.co.ke@gmail.com"
-  );
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] =
     useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] =
+    useState(false);
+
+  async function handleGoogleSignIn() {
+  setError("");
+  setIsGoogleLoading(true);
+
+  const redirectTo =
+    `${window.location.origin}/auth/callback`;
+
+  const { error: googleError } =
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+  if (googleError) {
+    console.error("Google login error:", googleError);
+
+    setError(
+      "Google sign-in could not be started. Please try again."
+    );
+
+    setIsGoogleLoading(false);
+  }
+}
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -43,63 +69,84 @@ export default function LoginForm() {
     router.refresh();
   }
 
+  const isBusy = isSubmitting || isGoogleLoading;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="adminLoginForm"
-    >
-      <div className="adminLoginField">
-        <label htmlFor="admin-email">
-          Email address
-        </label>
-
-        <input
-          id="admin-email"
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={(event) =>
-            setEmail(event.target.value)
-          }
-          required
-        />
-      </div>
-
-      <div className="adminLoginField">
-        <label htmlFor="admin-password">
-          Password
-        </label>
-
-        <input
-          id="admin-password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) =>
-            setPassword(event.target.value)
-          }
-          required
-        />
-      </div>
-
-      {error ? (
-        <p
-          className="adminLoginError"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
-
+    <div className="adminLoginMethods">
       <button
-        type="submit"
-        disabled={isSubmitting}
-        className="adminLoginButton"
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={isBusy}
+        className="adminGoogleLoginButton"
       >
-        {isSubmitting
-          ? "Signing in..."
-          : "Sign in securely"}
+        {isGoogleLoading
+          ? "Connecting to Google..."
+          : "Continue with Google"}
       </button>
-    </form>
+
+      <div className="adminLoginDivider">
+        <span>or sign in with email</span>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="adminLoginForm"
+      >
+        <div className="adminLoginField">
+          <label htmlFor="admin-email">
+            Email address
+          </label>
+
+          <input
+            id="admin-email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
+            disabled={isBusy}
+            required
+          />
+        </div>
+
+        <div className="adminLoginField">
+          <label htmlFor="admin-password">
+            Password
+          </label>
+
+          <input
+            id="admin-password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            disabled={isBusy}
+            required
+          />
+        </div>
+
+        {error ? (
+          <p
+            className="adminLoginError"
+            role="alert"
+          >
+            {error}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={isBusy}
+          className="adminLoginButton"
+        >
+          {isSubmitting
+            ? "Signing in..."
+            : "Sign in securely"}
+        </button>
+      </form>
+    </div>
   );
 }
