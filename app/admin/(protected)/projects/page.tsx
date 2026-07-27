@@ -33,7 +33,11 @@ export default function AdminProjectsPage() {
       .select("*");
 
     if (queryError) {
-      console.error("Unable to load admin projects:", queryError);
+      console.error(
+        "Unable to load admin projects:",
+        queryError.code,
+        queryError.message
+      );
       setError("Projects could not be loaded.");
       setProjects([]);
     } else {

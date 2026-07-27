@@ -43,7 +43,8 @@ export default function ProjectsPage() {
       if (queryError) {
         console.error(
           "Unable to load public projects:",
-          queryError
+          queryError.code,
+          queryError.message
         );
         setError(
           "Projects are temporarily unavailable. Please try again later."
