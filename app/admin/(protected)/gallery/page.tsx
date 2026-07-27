@@ -17,6 +17,7 @@ import {
   GalleryItem,
   GalleryPresentationType,
   getGalleryItems,
+  migrateLegacyGalleryItems,
   saveGalleryItem,
 } from "@/lib/galleryDb";
 import AdminSidebar from "@/components/AdminSidebar";
@@ -42,7 +43,7 @@ const emptyForm = {
   clientSector: "",
   description: "",
   date: "",
-  status: "Draft" as "Draft" | "Published",
+  status: "Draft" as GalleryItem["status"],
   featured: false,
   progress: 0,
   workersDeployed: 0,
@@ -66,16 +67,25 @@ export default function AdminGalleryPage() {
   const [saving, setSaving] = useState(false);
 
   async function loadItems() {
-    const records = await getGalleryItems();
-    setItems(records);
+    try {
+      await migrateLegacyGalleryItems();
+      const records = await getGalleryItems();
+      setItems(records);
 
-    setSelectedId((current) => {
-      if (records.some((item) => item.id === current)) {
-        return current;
-      }
+      setSelectedId((current) => {
+        if (records.some((item) => item.id === current)) {
+          return current;
+        }
 
-      return records[0]?.id ?? "";
-    });
+        return records[0]?.id ?? "";
+      });
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load gallery presentations."
+      );
+    }
   }
 
   useEffect(() => {
@@ -453,6 +463,7 @@ export default function AdminGalleryPage() {
               >
                 <option>Draft</option>
                 <option>Published</option>
+                <option>Archived</option>
               </select>
             </label>
 

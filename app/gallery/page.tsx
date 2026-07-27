@@ -11,46 +11,46 @@ import {
   getGalleryItems,
 } from "@/lib/galleryDb";
 
-const filters = [
-  "All",
-  "Construction",
-  "Recruitment",
-  "Concept Render",
-  "Ongoing Construction",
-  "Completed Project",
-  "Interview Setup",
-  "Recruitment Event",
-  "Training and Orientation",
-  "Recruitment Assignment",
-];
-
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeImageIndex, setActiveImageIndex] =
     useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   async function loadItems() {
-    const records = (await getGalleryItems()).filter(
-      (item) => item.status === "Published"
-    );
+    setLoading(true);
+    setError("");
 
-    setItems(records);
+    try {
+      const records = (await getGalleryItems()).filter(
+        (item) => item.status.toLocaleLowerCase() === "published"
+      );
 
-    setSelectedId((current) => {
-      if (records.some((item) => item.id === current)) {
-        return current;
-      }
+      setItems(records);
 
-      return records[0]?.id ?? "";
-    });
+      setSelectedId((current) => {
+        if (records.some((item) => item.id === current)) {
+          return current;
+        }
+
+        return records[0]?.id ?? "";
+      });
+    } catch (loadError) {
+      console.error("Unable to load public gallery:", loadError);
+      setItems([]);
+      setError("Gallery presentations are temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    loadItems();
+    void loadItems();
 
-    const refresh = () => loadItems();
+    const refresh = () => void loadItems();
 
     window.addEventListener(
       "workify-gallery-updated",
@@ -65,15 +65,30 @@ export default function GalleryPage() {
     };
   }, []);
 
+  const filters = useMemo(
+    () => [
+      "All",
+      ...Array.from(
+        new Set([
+          ...items.map((item) => item.division),
+          ...items.map((item) => item.presentationType),
+        ])
+      ),
+    ],
+    [items]
+  );
+
   const filteredItems = useMemo(() => {
-    if (activeFilter === "All") {
+    const normalizedFilter = activeFilter.toLocaleLowerCase();
+
+    if (normalizedFilter === "all") {
       return items;
     }
 
     return items.filter(
       (item) =>
-        item.division === activeFilter ||
-        item.presentationType === activeFilter
+        item.division.toLocaleLowerCase() === normalizedFilter ||
+        item.presentationType.toLocaleLowerCase() === normalizedFilter
     );
   }, [items, activeFilter]);
 
@@ -96,12 +111,14 @@ export default function GalleryPage() {
     setActiveFilter(filter);
 
     const first =
-      filter === "All"
+      filter.toLocaleLowerCase() === "all"
         ? items[0]
         : items.find(
             (item) =>
-              item.division === filter ||
-              item.presentationType === filter
+              item.division.toLocaleLowerCase() ===
+                filter.toLocaleLowerCase() ||
+              item.presentationType.toLocaleLowerCase() ===
+                filter.toLocaleLowerCase()
           );
 
     setSelectedId(first?.id ?? "");
@@ -144,12 +161,19 @@ export default function GalleryPage() {
           ))}
         </div>
 
-        {filteredItems.length === 0 ? (
+        {loading ? (
+          <div className="presentationGalleryEmpty" aria-live="polite">
+            <span>LOADING PRESENTATIONS</span>
+            <h2>Preparing the latest Workify gallery.</h2>
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="presentationGalleryEmpty">
-            <span>NO PUBLISHED PRESENTATIONS</span>
+            <span>
+              {error ? "GALLERY UNAVAILABLE" : "NO PUBLISHED PRESENTATIONS"}
+            </span>
             <h2>
-              The administrator has not published any
-              photos in this category yet.
+              {error ||
+                "The administrator has not published any photos in this category yet."}
             </h2>
           </div>
         ) : (
