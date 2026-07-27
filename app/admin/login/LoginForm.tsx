@@ -51,13 +51,16 @@ export default function LoginForm() {
     setError("");
     setIsSubmitting(true);
 
-    const { error: loginError } =
+    const {
+      data: { user },
+      error: loginError,
+    } =
       await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-    if (loginError) {
+    if (loginError || !user) {
       setError(
         "The email address or password is incorrect."
       );
@@ -65,7 +68,19 @@ export default function LoginForm() {
       return;
     }
 
-    router.replace("/admin");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, active")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const isAdministrator =
+      profile?.role === "super_admin" &&
+      profile?.active === true;
+
+    router.replace(
+      isAdministrator ? "/admin" : "/profile"
+    );
     router.refresh();
   }
 

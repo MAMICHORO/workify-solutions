@@ -25,7 +25,7 @@ export default async function AdminLoginPage() {
       redirect("/admin");
     }
 
-    await supabase.auth.signOut();
+    redirect("/profile");
   }
 
   return (

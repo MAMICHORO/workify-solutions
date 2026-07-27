@@ -11,7 +11,17 @@ export default async function AdminLoginPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/admin");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, active")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const isAdministrator =
+      profile?.role === "super_admin" &&
+      profile?.active === true;
+
+    redirect(isAdministrator ? "/admin" : "/profile");
   }
 
   return (
